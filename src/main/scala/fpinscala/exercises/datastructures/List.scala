@@ -27,7 +27,7 @@ object List: // `List` companion object. Contains functions for creating and wor
 
   @annotation.nowarn // Scala gives a hint here via a warning, so let's disable that
   // Answer: Case 3rd x + y will be returned: 1 + 2 = 3
-  val result = List(1, 2, 3, 4, 5) match
+  val result: Int = List(1, 2, 3, 4, 5) match
     case Cons(x, Cons(2, Cons(4, _))) => x
     case Nil => 42
     case Cons(x, Cons(y, Cons(3, Cons(4, _)))) => x + y
@@ -71,21 +71,51 @@ object List: // `List` companion object. Contains functions for creating and wor
     case Cons(x, y) if f(x) => dropWhile(y, f)
     case _ => l
 
-  def init[A](l: List[A]): List[A] = ???
 
-  def length[A](l: List[A]): Int = ???
+  // My Approach
+  def init[A](l: List[A]): List[A] =
+    l match
+      case Nil => Nil
+      case Cons(h, Cons(_, Nil)) => Cons(h, Nil)
+      case Cons(h, t) => Cons(h, init(t))
 
-  def foldLeft[A, B](l: List[A], acc: B, f: (B, A) => B): B = ???
+  // Answer from book
+  private def initAnswer[A](l: List[A]): List[A] =
+    l match
+      case Nil => sys.error("cannot init empty list")
+      case Cons(_, Nil) => Nil
+      case Cons(h, t) => Cons(h, initAnswer(t))
 
-  def sumViaFoldLeft(ns: List[Int]): Int = ???
 
-  def productViaFoldLeft(ns: List[Double]): Double = ???
+  def length[A](l: List[A]): Int = foldRight(l, 0, (x, y) => 1 + y)
 
-  def lengthViaFoldLeft[A](l: List[A]): Int = ???
+  @tailrec
+  def foldLeft[A, B](l: List[A], acc: B, f: (B, A) => B): B =
+    l match
+      case Nil => acc
+      case Cons(h, t) => foldLeft(t, f(acc, h), f)
 
-  def reverse[A](l: List[A]): List[A] = ???
+  def sumViaFoldLeft(ns: List[Int]): Int = foldLeft(ns, 0, (acc, x) => acc + x)
 
-  def appendViaFoldRight[A](l: List[A], r: List[A]): List[A] = ???
+  def productViaFoldLeft(ns: List[Double]): Double = foldLeft(ns, 1.0, (acc, x) => acc * x)
+
+  def lengthViaFoldLeft[A](l: List[A]): Int = foldLeft(l, 0, (acc, _) => acc + 1)
+
+  def reverse[A](l: List[A]): List[A] = foldLeft(l, Nil: List[A], (acc, h) => Cons(h, acc))
+
+  def appendViaFoldRight[A](l: List[A], r: List[A]): List[A] =
+    foldRight(l, r, (h, acc) => Cons(h, acc))
+
+  // ON HOLD
+  private def appendViaFoldLeft[A](l: List[A], r: List[A]): List[A] =
+    reverse(foldLeft(r, reverse(l), (acc, h) => Cons(h, acc)))
+
+  // TODO
+//  def foldRightWithFoldLeft[A, B](as: List[A], acc: B, f: (A, B) => B): B =
+//    foldLeft(reverse(as), acc, (acc, h) => f(h, acc))
+//  def foldLeftWithFoldRight[A, B](as: List[A], acc: B, f: (A, B) => B): B =
+//    foldRight(reverse(as), acc, f)
+
 
   def concat[A](l: List[List[A]]): List[A] = ???
 
@@ -106,3 +136,8 @@ object List: // `List` companion object. Contains functions for creating and wor
   // def zipWith - TODO determine signature
 
   def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = ???
+
+  @main
+  def main(): Unit =
+    print(appendViaFoldRight(List(1, 2, 3), List(4, 5)))
+    print(appendViaFoldLeft(List(1, 2, 3), List(4, 5)))
