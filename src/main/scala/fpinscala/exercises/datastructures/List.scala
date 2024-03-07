@@ -151,19 +151,25 @@ object List: // `List` companion object. Contains functions for creating and wor
     case (_, Nil) => Nil
     case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(t1, t2, f))
 
+// 1,2,3,4  // 2,3
+// 1,2
+// 2,3
 
   @tailrec
-  def checkIfPrefix[A](as: List[A], l: List[A]): Boolean = (as, l) match
-    case (_, Nil) => true
-    case (Nil, _) => false
-    case (Cons(h1, t1), Cons(h2, t2)) => h1 == h2 && checkIfPrefix(t1, t2)
+  def checkIfPrefix[A](a: List[A], b: List[A]): Boolean = (a, b) match
+    case (_, List.Nil) => true
+    case (Cons(h1, t1), Cons(h2, t2)) if h1 == h2 => checkIfPrefix(t1, t2)
+    case (_, _) => false
+
 
   @tailrec
-  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = sup match
-    case Nil => sub == Nil
-    case Cons(h, t) => if  checkIfPrefix(sup, sub) then true else hasSubsequence(t, sub)
+  def hasSubsequence[A](a: List[A], b: List[A]): Boolean = a match
+    case Nil => b == Nil
+    case x if checkIfPrefix(x,b) => true
+    case Cons(h,t) => hasSubsequence(t, b)
 
-
-  @main
-  def main(): Unit =
-    print(hasSubsequence(List(1, 2, 3, 4), List(2)))
+//  @main
+//  def main: Unit =
+//    val a = List(1,2,3,5)
+//    val b = List(2,5)
+//    println(hasSubsequence(a,b))
